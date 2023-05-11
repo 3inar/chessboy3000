@@ -2,7 +2,7 @@ using CSV
 
 reader = CSV.File("record.csv", header=0)
 
-initial_rank = 800.0
+initial_score = 800.0
 
 # https://en.wikipedia.org/wiki/Elo_rating_system
 function elo_update(white_rank, black_rank, outcome, K=30)
@@ -37,10 +37,10 @@ for row in reader
   outcome = row[3]
 
   if !haskey(ranking, white) 
-    ranking[white] = initial_rank 
+    ranking[white] = initial_score
   end
   if !haskey(ranking, black) 
-    ranking[black] = initial_rank 
+    ranking[black] = initial_score
   end
   
   new_scores = elo_update(ranking[white], ranking[black], outcome)
@@ -56,5 +56,3 @@ for i in 1:length(ranking)
   println(string(i) * ".\t" * ranking[i][1] * "\t" * string(Int(round(ranking[i][2]))))
 end
 
-
-ranking[1,1]
