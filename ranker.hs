@@ -5,10 +5,12 @@ initialScore = 800.0
 maxAdjustment = 30.0
 
 data Match = Match
-  { white :: String, 
-    black :: String, 
-    result :: Float
+  { whitePlayer :: String 
+  , blackPlayer :: String 
+  , result      :: Float
   }
+
+type Rating = (String, Float)
 
 -- Now that our different fields have names, each name actually acts as a function allows us to extract that value from the larger object. We no longer have to deconstruct the entire object via pattern matching to get each value out.
 
@@ -31,8 +33,8 @@ adjustment :: Float -> Float -> Float
 adjustment expected actual = maxAdjustment*(actual - expected)
 
 -- outcome is 1 if A won
-updateScore :: Float -> Float -> Float -> (Float, Float)
-updateScore ratingA ratingB outcome = (ratingA + adj, ratingB - adj)
+updateRating :: Float -> Float -> Float -> (Float, Float)
+updateRating ratingA ratingB outcome = (ratingA + adj, ratingB - adj)
   where adj = adjustment (expectedScore ratingA ratingB) outcome
 
 
@@ -55,28 +57,72 @@ splitComma str = term : (splitComma rest)
     rest = drop ((length term) + 1) str
 
 -- takes a line from the records "Player A, Player B, 1-0" and spits out
--- (("Player A", "Player B"), 1.0)
+-- a Match data structure
 recordToMatch :: String -> Match
-recordToMatch rec = let [a, b, c] = splitComma $ rec in Match a b (score c)
+recordToMatch rec = let [a, b, c] = splitComma $ rec 
+  in 
+    Match a b (score c)
   where
     score "1-0" = 1
     score "0-1" = 0
     score "1/2-1/2" = 0.5
 
--- want to use foldr somehow and take like ranking
--- updateRating :: [(String, Float)] -> ((String, String), Float) -> [(String, Float)]
--- updateRating = do
+-- replaces a single rating in the ranks
+replaceRating :: [Rating] -> Rating -> [Rating]
+replaceRating ranks newRating = map replacer ranks
+  where 
+    replacer x
+      | fst x == fst newRating = newRating
+      | otherwise              = x
+
+-- Need this because there is a theoretical chance that lookup returns Nothing?
+getRating :: [Rating] -> String -> Float
+getRating ratings player = case r of
+  Just r -> r
+  Nothing -> -1      -- shouldn't happen 
+  where r = lookup player ratings
+
+-- takes a full list of ratings + a match and returns new ratings for 
+-- the two players who played the match
+newRatings :: [Rating] -> Match -> [Rating]
+newRatings ratings match = [newWhite, newBlack]
+  where 
+    newWhite = (white, fst newRatings)
+    newBlack = (black, snd newRatings)
+
+    white = whitePlayer match
+    black = blackPlayer match
+
+    newRatings  = updateRating prevWhite prevBlack (result match)
+
+    prevWhite = getRating ratings white
+    prevBlack = getRating ratings black
+
+
+updateRanking :: [Rating] -> Match -> [Rating]
+updateRanking ratings match = updateBlack . updateWhite $ ratings
+  where 
+    updateWhite ratings = replaceRating ratings ratingWhite
+    updateBlack ratings = replaceRating ratings ratingBlack
+    [ratingWhite, ratingBlack] = newRatings ratings match
+
+processMatches :: ([Rating], [Match]) -> ([Rating], [Match])
+processMatches (ratings, matches) 
+  | length matches == 0 = (ratings, matches)
+  | otherwise           = processMatches (ratings', (tail matches))
+  where ratings' = updateRanking ratings (head matches)
   
 
 -- pull out unique player names from the set of matches
 uniquePlayers :: [Match] -> [String]
 uniquePlayers ls = nub $ foldr (++) [] $ map extractNames ls
   where 
-    extractNames match = [white match, black match]
+    extractNames match = [whitePlayer match, blackPlayer match]
 
 main = do
   contents <- readFile "record.csv"
 
   let matches = map recordToMatch (lines contents)
+      initialRatings = zip (uniquePlayers matches) (cycle [initialScore])
 
-  putStrLn $ show (uniquePlayers matches)
+  putStrLn $ show (fst $ processMatches (initialRatings, matches))
