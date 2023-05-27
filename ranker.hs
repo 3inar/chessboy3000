@@ -1,5 +1,5 @@
 import System.Environment -- Some I/O stuff
-import Data.List (nub) -- remove duplicates from list
+import Data.List (nub, sortOn) -- remove duplicates from list
 
 initialScore = 800.0
 maxAdjustment = 30.0
@@ -11,8 +11,6 @@ data Match = Match
   }
 
 type Rating = (String, Float)
-
--- Now that our different fields have names, each name actually acts as a function allows us to extract that value from the larger object. We no longer have to deconstruct the entire object via pattern matching to get each value out.
 
 -- expected score is a logistic function of the difference in ratings
 -- can be interpreted as a predicted probability of winning
@@ -123,6 +121,7 @@ main = do
   contents <- readFile "record.csv"
 
   let matches = map recordToMatch (lines contents)
-      initialRatings = zip (uniquePlayers matches) (cycle [initialScore])
+      ratings = zip (uniquePlayers matches) (cycle [initialScore])
+      ratings' = reverse $ sortOn snd $ fst $ processMatches (ratings, matches)
 
-  putStrLn $ show (fst $ processMatches (initialRatings, matches))
+  mapM_ print ratings'
