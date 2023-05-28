@@ -37,9 +37,8 @@ updateRating :: Float -> Float -> Float -> (Float, Float)
 updateRating ratingA ratingB outcome = (ratingA + adj, ratingB - adj)
   where adj = adjustment (expectedScore ratingA ratingB) outcome
 
-
 -- trim whitespaces on ends of strings
--- not in use atm.
+-- not in use atm but might be nice to have
 -- trim :: String -> String
 -- trim = reverse . stripLeft . reverse . stripLeft
 --   where
@@ -98,7 +97,7 @@ newRatings ratings match = [newWhite, newBlack]
     prevWhite = getRating ratings white
     prevBlack = getRating ratings black
 
-
+-- updates a ranking (list of ratings) from a single match
 updateRanking :: [Rating] -> Match -> [Rating]
 updateRanking ratings match = updateBlack . updateWhite $ ratings
   where 
@@ -106,23 +105,26 @@ updateRanking ratings match = updateBlack . updateWhite $ ratings
     updateBlack ratings = replaceRating ratings ratingBlack
     [ratingWhite, ratingBlack] = newRatings ratings match
 
+-- does the actual updating of the rankings from a list of matches
 processMatches :: ([Rating], [Match]) -> ([Rating], [Match])
 processMatches (ratings, matches) 
   | length matches == 0 = (ratings, matches)
   | otherwise           = processMatches (ratings', (tail matches))
   where ratings' = updateRanking ratings (head matches)
 
-ratingToString :: Rating -> String
-ratingToString rating = (fst rating) ++ " " ++ (show.round) (snd rating)
-  
--- ratingsToStrings :: [Rating] -> [String]
--- ratingsToStrings ratings = 
-
 -- pull out unique player names from the set of matches
 uniquePlayers :: [Match] -> [String]
 uniquePlayers ls = nub $ foldr (++) [] $ map extractNames ls
   where 
     extractNames match = [whitePlayer match, blackPlayer match]
+
+-- converts a rather contrived mess into a formatted string
+messToString :: (Int, Rating) -> String
+messToString rating = place ++ ".\t" ++ name ++ "\t\t" ++ points
+  where
+    place = show (fst rating)
+    name = fst.snd $ rating
+    points = (show.round) (snd.snd $ rating)
 
 main = do
   inputHandle <- openFile "record.csv" ReadMode 
@@ -132,6 +134,9 @@ main = do
 
   let matches = map recordToMatch (lines contents)
       ratings = zip (uniquePlayers matches) (cycle [initialScore])
-      ratings' = reverse $ sortOn snd $ fst $ processMatches (ratings, matches)
+      ratings' = processMatches (ratings, matches)
+      ordered = zip [1..] (reverse $ sortOn snd $ fst $ ratings')
 
-  mapM_ (hPutStrLn stdout) (map ratingToString ratings')
+  putStrLn "A218B/HDL chess federation official ranking"
+  putStrLn "-------------------------------------------"
+  mapM_ (hPutStrLn stdout) (map messToString ordered)
