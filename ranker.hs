@@ -1,5 +1,7 @@
 import System.Environment -- Some I/O stuff
-import Data.List (nub, sortOn) -- remove duplicates from list
+import Data.List (nub, sortOn) 
+
+import System.IO
 
 initialScore = 800.0
 maxAdjustment = 30.0
@@ -109,7 +111,12 @@ processMatches (ratings, matches)
   | length matches == 0 = (ratings, matches)
   | otherwise           = processMatches (ratings', (tail matches))
   where ratings' = updateRanking ratings (head matches)
+
+ratingToString :: Rating -> String
+ratingToString rating = (fst rating) ++ " " ++ (show.round) (snd rating)
   
+-- ratingsToStrings :: [Rating] -> [String]
+-- ratingsToStrings ratings = 
 
 -- pull out unique player names from the set of matches
 uniquePlayers :: [Match] -> [String]
@@ -118,10 +125,13 @@ uniquePlayers ls = nub $ foldr (++) [] $ map extractNames ls
     extractNames match = [whitePlayer match, blackPlayer match]
 
 main = do
-  contents <- readFile "record.csv"
+  inputHandle <- openFile "record.csv" ReadMode 
+  hSetEncoding inputHandle utf8
+  hSetEncoding stdout utf8
+  contents <- hGetContents inputHandle
 
   let matches = map recordToMatch (lines contents)
       ratings = zip (uniquePlayers matches) (cycle [initialScore])
       ratings' = reverse $ sortOn snd $ fst $ processMatches (ratings, matches)
 
-  mapM_ print ratings'
+  mapM_ (hPutStrLn stdout) (map ratingToString ratings')
