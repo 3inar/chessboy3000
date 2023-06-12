@@ -120,11 +120,15 @@ uniquePlayers ls = nub $ foldr (++) [] $ map extractNames ls
 
 -- converts a rather contrived mess into a formatted string
 messToString :: (Int, Rating) -> String
-messToString rating = place ++ ".\t" ++ name ++ "\t\t" ++ points
+messToString rating = (padplace place) ++ (padname name) ++ points
   where
-    place = show (fst rating)
+    place = fst rating
     name = fst.snd $ rating
     points = (show.round) (snd.snd $ rating)
+    padplace place
+      | place < 10 = (show place) ++ ".  "
+      | otherwise  = (show place) ++ ". "
+    padname name = name ++ (replicate (12 - (length name)) ' ')
 
 main = do
   inputHandle <- openFile "record.csv" ReadMode 
