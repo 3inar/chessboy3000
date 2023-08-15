@@ -8,7 +8,8 @@ A218B/HDL chess federation official ranking
 6.  Erling      813
 7.  Nikita      785
 8.  Bjørn R     785
-9.  Helge       771
-10. Kristian    769
-11. Lars A      749
-12. Einar       738
+9.  Lars A      782
+10. Helge       771
+11. Kristian    769
+12. Binod       767
+13. Einar       738
