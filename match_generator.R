@@ -3,6 +3,7 @@ players <- c(
  "Edvard",
  "Lars A",
  "Vi",
+ "Helge",
  "Anders Sildnes",
  "Rigmor",
  "Maisha",
