@@ -67,7 +67,6 @@ end
 longestname = maximum(length.(keys(ranking)))
 
 ranking = sort!(collect(ranking), by=last, rev=true)
-println(string(longestname))
 padto = 4*Int(ceil((longestname + 1)/4.0))
 
 println("A218B/HDL chess federation official ranking")

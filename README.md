@@ -1,4 +1,3 @@
-8
 A218B/HDL chess federation official ranking
 -------------------------------------------
 1.  Edvard      926
