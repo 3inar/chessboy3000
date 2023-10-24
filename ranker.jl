@@ -31,10 +31,16 @@ function elo_update(white_rank, black_rank, outcome, K=30)
 end
 
 ranking = Dict()
+activity = Dict()
+
+counter = 1
 for row in reader
   white = row[1]
   black = row[2]
   outcome = row[3]
+
+  activity[white] = counter
+  activity[black] = counter
 
   if !haskey(ranking, white) 
     ranking[white] = initial_score
@@ -46,13 +52,37 @@ for row in reader
   new_scores = elo_update(ranking[white], ranking[black], outcome)
   ranking[white] = new_scores[1]
   ranking[black] = new_scores[2]
+
+  global counter = counter + 1
 end
 
+# removes inactive players 
+inactive_lim = maximum(values(activity)) - 50
+for (key, value) in activity
+    if value < inactive_lim
+      delete!(ranking, key)
+    end
+end
+
+longestname = maximum(length.(keys(ranking)))
+
 ranking = sort!(collect(ranking), by=last, rev=true)
+println(string(longestname))
+padto = 4*Int(ceil((longestname + 1)/4.0))
 
 println("A218B/HDL chess federation official ranking")
 println("-------------------------------------------")
 for i in 1:length(ranking)
-  println(string(i) * ".\t" * ranking[i][1] * "\t" * string(Int(round(ranking[i][2]))))
+  if i < 10
+    pad1 = "  "
+  else
+    pad1 = " "
+  end
+
+  pad2 = repeat(" ", padto - length(ranking[i][1]))
+
+  println(string(i) * "." * pad1 * 
+          ranking[i][1] * pad2 * 
+          string(Int(round(ranking[i][2]))))
 end
 
