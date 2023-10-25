@@ -1,6 +1,6 @@
 using CSV
 
-reader = CSV.File("record.csv", header=0)
+matches = readlines("record.csv")
 
 initial_score = 800.0
 
@@ -34,7 +34,8 @@ ranking = Dict()
 activity = Dict()
 
 counter = 1
-for row in reader
+for row in matches
+  row = split(row, ",")
   white = row[1]
   black = row[2]
   outcome = row[3]
