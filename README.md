@@ -1,14 +1,15 @@
 A218B/HDL chess federation official ranking
 -------------------------------------------
-1.  Edvard      926
+1.  Edvard      943
 2.  Geir        856
 3.  Mohsen      830
-4.  Lars A      800
-5.  Bjørn R     799
-6.  Anders      796
-7.  Amund       787
-8.  Dominik     783
-9.  Kristian    769
-10. Binod       767
-11. Einar       742
-12. Helge       731
+4.  Rafa        805
+5.  Lars A      800
+6.  Bjørn R     799
+7.  Anders      796
+8.  Amund       784
+9.  Dominik     783
+10. Kristian    769
+11. Binod       767
+12. Einar       737
+13. Helge       731
