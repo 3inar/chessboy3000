@@ -1,5 +1,3 @@
-using CSV
-
 matches = readlines("record.csv")
 
 initial_score = 800.0
