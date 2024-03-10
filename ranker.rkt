@@ -43,32 +43,11 @@
 
 (define ranking (sort (hash->list ratings) #:key cdr >))
 
-; ranking = sort!(collect(ranking), by=last, rev=true)
-; padto = 4*Int(ceil((longestname + 1)/4.0))
-; 
-; println("A218B/HDL chess federation official ranking")
-; println("-------------------------------------------")
-; for i in 1:length(ranking)
-;   if i < 10
-;     pad1 = "  "
-;   else
-;     pad1 = " "
-;   end
-; 
-;   pad2 = repeat(" ", padto - length(ranking[i][1]))
-; 
-;   println(string(i) * "." * pad1 * 
-;           ranking[i][1] * pad2 * 
-;           string(Int(round(ranking[i][2]))))
-; end
-
 ; pad string w spaces to target length
 (define (pad str len) 
   (if (<= len (string-length str))
       str 
       (pad (string-join (list str " ") "") len)))
-
-; get list of players for a set of games
 
 ; list of active players: people who played in the last 50 games
 ; this is kind of ugly?? used (let ()) before. maybe better?
@@ -80,12 +59,13 @@
   (extract-players (drop games n_drop)))))
 
 
+; just to make a list '("1." "2." ...
 (define (positions n_players)
   (map (lambda (x) (string-join (list (~r x) ".") ""))
        (range 1 (+ n_players 1))))
 
 ; filter inactive players out
-(define ranked (filter (lambda (x) (member (car x) active)) ranking))
+(define ranked (filter (lambda (player) (member (car player) active)) ranking))
 
 (displayln "A218B/HDL chess federation official ranking")
 (displayln "-------------------------------------------")
@@ -98,6 +78,3 @@
             (displayln (string-join (list ppos pplayer rating)))) 
           (positions (length ranked))
           ranked)
-; string-join
-; exact-round
-; (~r 4) -> "4"
